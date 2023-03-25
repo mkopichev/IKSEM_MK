@@ -9,9 +9,9 @@
 // this affects on calibration table
 #include "include/iksemdefparam.h"
 
-#define DDR_SPI  DDRB
+#define DDR_SPI DDRB
 #define PORT_SPI PORTB
-#define SS       0
+#define SS 0
 
 #define ADC_VREF_TYPE ((1 << REFS1) | (1 << REFS0))
 #ifndef UDRE
@@ -87,17 +87,23 @@ ISR(TIMER2_OVF_vect);
 void load_from_eeprom(void);
 void save_to_eeprom(void);
 
-uint16_t load_cell_filter(void) {
+uint16_t load_cell_filter(void)
+{
     uint8_t tmp;
     unsigned long int sum = 0;
 
-    if(measuring_start_counter < 2) {
-        for(tmp = (AVERAGE_NUMBER - 1); tmp > 0; tmp--) {
+    if (measuring_start_counter < 2)
+    {
+        for (tmp = (AVERAGE_NUMBER - 1); tmp > 0; tmp--)
+        {
             load_cell_MAS[tmp] = load_cell;
             sum = sum + load_cell;
         }
-    } else {
-        for(tmp = (AVERAGE_NUMBER - 1); tmp > 0; tmp--) {
+    }
+    else
+    {
+        for (tmp = (AVERAGE_NUMBER - 1); tmp > 0; tmp--)
+        {
             load_cell_MAS[tmp] = load_cell_MAS[tmp - 1];
             sum = sum + load_cell_MAS[tmp];
         }
@@ -110,14 +116,16 @@ uint16_t load_cell_filter(void) {
 
 // Write a character to the USART1 Transmitter
 // #pragma region
-void putchar1(char c) {
-    while((UCSR1A & DATA_REGISTER_EMPTY) == 0)
+void putchar1(char c)
+{
+    while ((UCSR1A & DATA_REGISTER_EMPTY) == 0)
         continue;
     UDR1 = c;
 }
 // #pragma endregion
 
-int main(void) {
+int main(void)
+{
     // Declare your local variables here
     uint8_t main_cycle = 0, flag_led_direction = 0, led_cycle = 0;
     uint16_t BAT = 0;
@@ -154,7 +162,8 @@ int main(void) {
     uart1SendString(N_string); // Set BLUETOOTH NAME
     sei();
 
-    while(1) {
+    while (1)
+    {
         /*
          program_cycle_flag=0;
          while(program_cycle_flag!=1)
@@ -176,19 +185,21 @@ int main(void) {
         SEND_MAS[4] = IK_SPEED_KM_H % 100;
 #endif
 
-        if(flag_start == 1) {
+        if (flag_start == 1)
+        {
             TIME_OUT = 10 * 60 * 30;
 
             // measuring_start_counter++;
         } // 30 min
-        else {
-            if(TIME_OUT == 0)
+        else
+        {
+            if (TIME_OUT == 0)
                 PORTC &= ~(1 << 0); // iksem - off
             else
                 TIME_OUT--;
         }
 
-        while(!(PINB & (1 << 3))) //! DDRDY
+        while (!(PINB & (1 << 3))) //! DDRDY
         {
         }
 
@@ -196,13 +207,19 @@ int main(void) {
         TMPL = TCNT3L; // read low first
         TMP = TCNT3H;
         TMP = (TMP << 8) + TMPL;
-        if((TMP < (1080 - 250)) || (TMP > (1080 + 250))) {
-            if(ADC_fault_counter > 5) {
+        if ((TMP < (1080 - 250)) || (TMP > (1080 + 250)))
+        {
+            if (ADC_fault_counter > 5)
+            {
                 PORTC &= ~(1 << 0); // iksem - off
-            } else {
+            }
+            else
+            {
                 ADC_fault_counter++;
             }
-        } else {
+        }
+        else
+        {
             ADC_fault_counter = 0;
             PORTC |= (1 << 0); // iksem - on
         }
@@ -218,7 +235,8 @@ int main(void) {
 #ifdef ADC_TO_KG
         load_cell = load_cell - ADC_0_KG;
         load_cell = (int)(((long int)load_cell * 10000) / (long int)ADC_100_KG);
-        if(load_cell < 0) {
+        if (load_cell < 0)
+        {
             load_cell = 0;
         }
 #endif
@@ -227,14 +245,18 @@ int main(void) {
         //  1 adc = 0,01486 kg
 
         M = load_cell_filter();
-        if(M < 0)
+        if (M < 0)
             M = 0;
-        if(M > 10000)
+        if (M > 10000)
             M = 10000;
-        if(flag_start == 0) {
+        if (flag_start == 0)
+        {
             measuring_start_counter = 0;
-        } else {
-            if(measuring_start_counter < 30) {
+        }
+        else
+        {
+            if (measuring_start_counter < 30)
+            {
                 measuring_start_counter++;
             }
         }
@@ -244,7 +266,7 @@ int main(void) {
         //---------------------------------------------
 
         // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
-        if(ZADANIE_S == 15)
+        if (ZADANIE_S == 15)
             K = K_BY_KOEFFICIENTS_ASFT(M);
         else
             K = K_BY_KOEFFICIENTS_REAL(M);
@@ -257,10 +279,11 @@ int main(void) {
         ADC_I = read_adc(1); // 0.021В датчика = 1А = 2.1*4 = 8.4 АЦП (1024 = 2.56в)
         BAT_SUM = (BAT_SUM * 9) / 10 + ADC_BAT;
         ADC_BAT = BAT_SUM / 10;
-        if(flag_I_NULL < 10) {
+        if (flag_I_NULL < 10)
+        {
             I_NULL = I_NULL + ADC_I;
 
-            if(flag_I_NULL == 9)
+            if (flag_I_NULL == 9)
                 I_NULL = I_NULL / 10;
 
             flag_I_NULL++;
@@ -272,10 +295,13 @@ int main(void) {
         //  I=0;
         // else
 
-        if(BAT <= 610) {
+        if (BAT <= 610)
+        {
             SEND_MAS[23] = 0;
-        } else {
-            if(BAT >= 660)
+        }
+        else
+        {
+            if (BAT >= 660)
                 SEND_MAS[23] = 100;
             else
                 SEND_MAS[23] = (uint8_t)((BAT - 610) * 2);
@@ -284,7 +310,7 @@ int main(void) {
 
         I = ADC_I;
         I = (int)(((long)(I_NULL - I) * 100) / 84); // 0.021В датчика = 1А = 2.1*4 = 8.4 АЦП (1024 = 2.56в) 2.52v=0
-        if(I < 0)
+        if (I < 0)
             I = 0;
 
         SEND_MAS[9] = I / 100;
@@ -293,14 +319,19 @@ int main(void) {
         // Контрольная сумма----------------------
         Control_Sum_Send();
         //---------------------------------------
-        if(flag_transmission == 255) {
+        if (flag_transmission == 255)
+        {
             uart1SendArray(SEND_MAS, 26);
-        } else {
-            if(flag_transmission == 248) {
+        }
+        else
+        {
+            if (flag_transmission == 248)
+            {
                 uart1SendArray(SETUP_MAS, 8);
                 flag_transmission = 255;
             }
-            if(flag_transmission == 249) {
+            if (flag_transmission == 249)
+            {
                 uart1SendArray(CALIBR_MAS, 10);
                 flag_transmission = 255;
             }
@@ -310,18 +341,18 @@ int main(void) {
         lights(252 - led_cycle * 28, led_cycle * 28, 252 - led_cycle * 28);
         sei();
 
-        if(led_cycle == 9)
+        if (led_cycle == 9)
             flag_led_direction = 1;
 
-        if(led_cycle == 0)
+        if (led_cycle == 0)
             flag_led_direction = 0;
 
-        if(flag_led_direction == 0)
+        if (flag_led_direction == 0)
             led_cycle++;
         else
             led_cycle--;
 
-        if(main_cycle >= 9)
+        if (main_cycle >= 9)
             main_cycle = 0;
         else
             main_cycle++;
@@ -339,16 +370,22 @@ ISR(INT6_vect) // TK_SPEED
     L = TCNT1L;
     H = TCNT1H;
     TK_COUNT[1] = (unsigned long)H * 256 + (unsigned long)L;
-    if(ovf_TK > 0) {
-        if(ovf_TK == 2) {
+    if (ovf_TK > 0)
+    {
+        if (ovf_TK == 2)
+        {
             TK_DELTA = 0;
             TK_COUNT[0] = 0;
             TK_COUNT[1] = 0;
-        } else {
+        }
+        else
+        {
             TK_DELTA = (65536 - TK_COUNT[0]) + TK_COUNT[1];
         }
         ovf_TK = 0;
-    } else {
+    }
+    else
+    {
         TK_DELTA = TK_COUNT[1] - TK_COUNT[0];
     }
 }
@@ -361,21 +398,28 @@ ISR(INT7_vect) // IK_SPEED
     L = TCNT1L;
     H = TCNT1H;
     IK_COUNT[1] = (unsigned long)H * 256 + (unsigned long)L;
-    if(ovf_IK > 0) {
-        if(ovf_IK == 2) {
+    if (ovf_IK > 0)
+    {
+        if (ovf_IK == 2)
+        {
             IK_DELTA = 0;
             IK_COUNT[0] = 0;
             IK_COUNT[1] = 0;
-        } else {
+        }
+        else
+        {
             IK_DELTA = (65536 - IK_COUNT[0]) + IK_COUNT[1];
         }
         ovf_IK = 0;
-    } else {
+    }
+    else
+    {
         IK_DELTA = IK_COUNT[1] - IK_COUNT[0];
     }
 }
 
-void init_all(void) {
+void init_all(void)
+{
 
     // Port B initialization
     DDRB |= (1 << 4);
@@ -520,44 +564,47 @@ void init_all(void) {
     ADCSRA = 0x87;
 }
 
-uint16_t K_BY_KOEFFICIENTS_REAL(uint16_t M) {
+uint16_t K_BY_KOEFFICIENTS_REAL(uint16_t M)
+{
     unsigned long F, W, K;
     // WEIGHT_NULL=6679, LOADCELL_NULL=618, DELTA_WEIGHT10KG=748, DELTA_LOADCELL10KG=772
-    if(M < LOADCELL_NULL)
+    if (M < LOADCELL_NULL)
         return 0;
 
     F = ((M - (unsigned long)LOADCELL_NULL) * 1000) / ((unsigned long)DELTA_LOADCELL10KG);
     W = (unsigned long)WEIGHT_NULL - ((unsigned long)DELTA_WEIGHT10KG * F) / 1000;
-    if(W > 0)
+    if (W > 0)
         K = ((F * 1000) / W) - 28; // frCoef -
     else
         K = 1800;
 
-    if(K > 1800)
+    if (K > 1800)
         K = 1800;
     return K;
 }
 
-uint16_t K_BY_KOEFFICIENTS_ASFT(uint16_t M) {
+uint16_t K_BY_KOEFFICIENTS_ASFT(uint16_t M)
+{
     long F, W, K;
     // WEIGHT_NULL=6679, LOADCELL_NULL=618, DELTA_WEIGHT10KG=748, DELTA_LOADCELL10KG=772
 
     F = (long)M - LOADCELL_NULL;
-    if(F < 0)
+    if (F < 0)
         F = 0;
     F = (F * 1000) / DELTA_LOADCELL10KG;
     W = WEIGHT_NULL;
     K = (F * 1000) / W;
 
-    if(K > 3000)
+    if (K > 3000)
         K = 3000;
 
-    if(K > 100)
+    if (K > 100)
         K = 1000000 / (1000000 / (unsigned long)K + 430 - 637);
     return K;
 }
 
-void Read_Setup_Calibr(void) {
+void Read_Setup_Calibr(void)
+{
     // uint8_t CALIBR_MAS[10]={249,66,94,7,9,7,2,8,24,(66+94+7+9+7+2+8+24)/8};
     // uint16_t WEIGHT_NULL=6694, LOADCELL_NULL=709, DELTA_WEIGHT10KG=702, DELTA_LOADCELL10KG=824;
     ZADANIE_S = SETUP_MAS[3];
@@ -575,39 +622,45 @@ void Read_Setup_Calibr(void) {
     DELTA_LOADCELL10KG = (uint16_t)CALIBR_MAS[7] * 100 + (uint16_t)CALIBR_MAS[8];
 }
 
-void Control_Sum_Send(void) {
+void Control_Sum_Send(void)
+{
     uint8_t tmp = 0;
     uint16_t S = 0;
 
-    for(tmp = 1; tmp < 25; tmp++)
+    for (tmp = 1; tmp < 25; tmp++)
         S = S + SEND_MAS[tmp];
     SEND_MAS[25] = S / 24;
 }
 
-void Control_Sum_Calibr(void) {
+void Control_Sum_Calibr(void)
+{
     uint8_t tmp = 0;
     uint16_t S = 0;
 
-    for(tmp = 1; tmp < 9; tmp++)
+    for (tmp = 1; tmp < 9; tmp++)
         S = S + CALIBR_MAS[tmp];
     CALIBR_MAS[9] = S / 8;
 }
 
-void Control_Sum_Setup(void) {
+void Control_Sum_Setup(void)
+{
     uint8_t tmp = 0;
     uint16_t S = 0;
 
-    for(tmp = 1; tmp < 7; tmp++)
+    for (tmp = 1; tmp < 7; tmp++)
         S = S + SETUP_MAS[tmp];
     SETUP_MAS[7] = S / 6;
 }
 
 // Timer 1 overflow interrupt service routine
-ISR(TIMER1_OVF_vect) {
-    if(ovf_IK < 2) {
+ISR(TIMER1_OVF_vect)
+{
+    if (ovf_IK < 2)
+    {
         ovf_IK++;
     }
-    if(ovf_TK < 2) {
+    if (ovf_TK < 2)
+    {
         ovf_TK++;
     }
 }
@@ -615,32 +668,40 @@ ISR(TIMER1_OVF_vect) {
 //***********************************************************************************************************
 //***********************************************************************************************************
 
-void uart1SendByte(char data) {
-    while(!(UCSR1A & (1 << UDRE)))
+void uart1SendByte(char data)
+{
+    while (!(UCSR1A & (1 << UDRE)))
         continue;
     UDR1 = data;
 }
 
-void uart1SendString(char *str) {
-    while(*str) {
+void uart1SendString(char *str)
+{
+    while (*str)
+    {
         uart1SendByte(*str++);
     }
 }
 
-void uart1SendArray(uint8_t *array, uint8_t size) {
+void uart1SendArray(uint8_t *array, uint8_t size)
+{
     uint8_t i;
-    for(i = 0; i < size; ++i) {
+    for (i = 0; i < size; ++i)
+    {
         uart1SendByte(array[i]);
     }
 }
 
 // USART1 Receiver interrupt service routine
-ISR(USART1_RX_vect) {
+ISR(USART1_RX_vect)
+{
     uint8_t data;
     data = UDR1;
-    if((receive_counter == 0) || (data > 245)) {
+    if ((receive_counter == 0) || (data > 245))
+    {
         receive_counter = 0;
-        switch(data) {
+        switch (data)
+        {
         // setup request
         case 246:
             flag_transmission = 248;
@@ -665,7 +726,7 @@ ISR(USART1_RX_vect) {
 
             // system on
         case 250:
-            if(flag_I_NULL < 10) // If the current null calibration has not finished
+            if (flag_I_NULL < 10) // If the current null calibration has not finished
                 break;
             flag_start = 1;
             break;
@@ -683,18 +744,24 @@ ISR(USART1_RX_vect) {
             PORTC &= ~(1 << 1); // fonar off
             break;
         }
-    } else {
-        if(flag_receive == 248) {
+    }
+    else
+    {
+        if (flag_receive == 248)
+        {
             SETUP_MAS[8 - receive_counter] = data;
-            if(receive_counter == 1) {
+            if (receive_counter == 1)
+            {
                 save_to_eeprom();
                 Read_Setup_Calibr();
             }
         }
 
-        if(flag_receive == 249) {
+        if (flag_receive == 249)
+        {
             CALIBR_MAS[10 - receive_counter] = data;
-            if(receive_counter == 1) {
+            if (receive_counter == 1)
+            {
                 save_to_eeprom();
                 Read_Setup_Calibr();
             }
@@ -705,14 +772,15 @@ ISR(USART1_RX_vect) {
 }
 
 // Read the AD conversion result
-uint16_t read_adc(uint8_t adc_input) {
+uint16_t read_adc(uint8_t adc_input)
+{
     ADMUX = adc_input | (ADC_VREF_TYPE & 0xff);
     // Delay needed for the stabilization of the ADC input voltage
     _delay_us(7);
     // Start the AD conversion
     ADCSRA |= 0x40;
     // Wait for the AD conversion to complete
-    while((ADCSRA & 0x10) == 0)
+    while ((ADCSRA & 0x10) == 0)
         continue;
     ADCSRA |= 0x10;
     return ADCW;
@@ -724,46 +792,51 @@ uint8_t NEW_REGULATOR(/*uint16_t Z,*/ uint16_t S) // s 1000=1
 
     E = 150 - S; // z always 150
     PID_I_S = PID_I_S + E;
-    if(PID_I_S > 1000)
+    if (PID_I_S > 1000)
         PID_I_S = 1000;
-    if(PID_I_S < 0)
+    if (PID_I_S < 0)
         PID_I_S = 0;
 
-    if(S < 30)
+    if (S < 30)
         PID_I_S = 800;
 
     U = PID_I_S;
 
     U = U / 4;
-    if(U < 0)
+    if (U < 0)
         U = 0;
-    if(U > 255)
+    if (U > 255)
         U = 255;
     return (uint8_t)U;
 }
 
 // Timer2 overflow interrupt service routine
 ////100HZ Program cycle
-ISR(TIMER2_OVF_vect) {
+ISR(TIMER2_OVF_vect)
+{
     int SCOLGENIE = 0;
     uint8_t PWM = 0;
 
     TCNT2 = 148; // 100HZ
     // Speed---------------------------------------------------------------------------
-    if((IK_DELTA > 400) && (ovf_IK < 2)) //   ~~160km/h             172,800 kHz
+    if ((IK_DELTA > 400) && (ovf_IK < 2)) //   ~~160km/h             172,800 kHz
     {
         IK_SPEED_KM_H = (uint16_t)(((unsigned long)R_IK * 2255) / IK_DELTA);
-    } else {
+    }
+    else
+    {
         IK_SPEED_KM_H = 0;
     }
     IK_SPEED_MAS[0] = IK_SPEED_MAS[1];
     IK_SPEED_MAS[1] = IK_SPEED_MAS[2];
     IK_SPEED_MAS[2] = IK_SPEED_KM_H;
 
-    if((TK_DELTA > 400) && (ovf_TK < 2)) //   ~~160            172,800 kHz
+    if ((TK_DELTA > 400) && (ovf_TK < 2)) //   ~~160            172,800 kHz
     {
         TK_SPEED_KM_H = (uint16_t)(((unsigned long)R_TK * 2171) / TK_DELTA);
-    } else {
+    }
+    else
+    {
         TK_SPEED_KM_H = 0;
     }
     TK_SPEED_MAS[0] = TK_SPEED_MAS[1];
@@ -772,27 +845,36 @@ ISR(TIMER2_OVF_vect) {
     // Speed---------------------------------------------------------------------------
 
     // Proverka u vichiclenie skolgenia---------------------------------------------------------------
-    if((IK_SPEED_KM_H >= TK_SPEED_KM_H) || (TK_SPEED_KM_H < 100)) // 10kmh
+    if ((IK_SPEED_KM_H >= TK_SPEED_KM_H) || (TK_SPEED_KM_H < 100)) // 10kmh
         SCOLGENIE = 0;
     else
         SCOLGENIE = (int)((((long int)(TK_SPEED_KM_H - IK_SPEED_KM_H)) * 1000) / ((long int)TK_SPEED_KM_H));
     //-----------------------------------------------------------------------------------------------
 
-    if(flag_start == 1) {
-        if(TK_SPEED_KM_H < 750) {
+    if (flag_start == 1)
+    {
+        if (TK_SPEED_KM_H < 750)
+        {
             PWM = NEW_REGULATOR(/*ZADANIE_S * 10,*/ (uint16_t)SCOLGENIE);
-        } else {
+        }
+        else
+        {
             PWM = 255;
             // PID_I_S=800;
         }
-    } else {
+    }
+    else
+    {
         PWM = 0;
     }
     OCR0 = 255 - PWM;
 
-    if(program_cycle_counter < 9) {
+    if (program_cycle_counter < 9)
+    {
         program_cycle_counter++;
-    } else {
+    }
+    else
+    {
         program_cycle_flag = 1;
         program_cycle_counter = 0;
     }
@@ -803,61 +885,75 @@ ISR(TIMER2_OVF_vect) {
 
 // uint8_t CALIBR_MAS[10]={249,66,94,7,9,7,2,8,24,(66+94+7+9+7+2+8+24)/8};
 // uint8_t SETUP_MAS[8]={248,198,130,10,1,0,0,(198+130+10+1)/6};
-void load_from_eeprom(void) {
+void load_from_eeprom(void)
+{
     uint8_t tmp;
     uint16_t cal_sum = 0, setup_sum = 0;
 
     CALIBR_MAS[0] = EEP_CALIBR_MAS[0];
     CALIBR_MAS[9] = EEP_CALIBR_MAS[9];
-    for(tmp = 1; tmp <= 8; tmp++) {
+    for (tmp = 1; tmp <= 8; tmp++)
+    {
         CALIBR_MAS[tmp] = EEP_CALIBR_MAS[tmp];
         cal_sum = cal_sum + CALIBR_MAS[tmp];
     }
     cal_sum = cal_sum / 8;
 
-    if((CALIBR_MAS[0] != 249) || (CALIBR_MAS[9] != cal_sum)) {
-        for(tmp = 0; tmp <= 9; tmp++) {
+    if ((CALIBR_MAS[0] != 249) || (CALIBR_MAS[9] != cal_sum))
+    {
+        for (tmp = 0; tmp <= 9; tmp++)
+        {
             CALIBR_MAS[tmp] = DEFAULT_CALIBR_MAS[tmp];
         }
     }
 
     SETUP_MAS[0] = EEP_SETUP_MAS[0];
     SETUP_MAS[7] = EEP_SETUP_MAS[7];
-    for(tmp = 1; tmp <= 6; tmp++) {
+    for (tmp = 1; tmp <= 6; tmp++)
+    {
         SETUP_MAS[tmp] = EEP_SETUP_MAS[tmp];
         setup_sum = setup_sum + SETUP_MAS[tmp];
     }
     setup_sum = setup_sum / 6;
-    if((SETUP_MAS[0] != 248) || (SETUP_MAS[7] != setup_sum)) {
-        for(tmp = 0; tmp <= 7; tmp++) {
+    if ((SETUP_MAS[0] != 248) || (SETUP_MAS[7] != setup_sum))
+    {
+        for (tmp = 0; tmp <= 7; tmp++)
+        {
             SETUP_MAS[tmp] = DEFAULT_SETUP_MAS[tmp];
         }
     }
 }
 
-void save_to_eeprom(void) {
+void save_to_eeprom(void)
+{
     uint8_t tmp;
     uint16_t sum;
 
     sum = 0;
-    for(tmp = 1; tmp <= 8; tmp++) {
+    for (tmp = 1; tmp <= 8; tmp++)
+    {
         sum = sum + CALIBR_MAS[tmp];
     }
     sum = sum / 8;
 
-    if(sum == CALIBR_MAS[9]) {
-        for(tmp = 0; tmp <= 9; tmp++) {
+    if (sum == CALIBR_MAS[9])
+    {
+        for (tmp = 0; tmp <= 9; tmp++)
+        {
             EEP_CALIBR_MAS[tmp] = CALIBR_MAS[tmp];
         }
     }
 
     sum = 0;
-    for(tmp = 1; tmp <= 6; tmp++) {
+    for (tmp = 1; tmp <= 6; tmp++)
+    {
         sum = sum + SETUP_MAS[tmp];
     }
     sum = sum / 6;
-    if(sum == SETUP_MAS[7]) {
-        for(tmp = 0; tmp <= 7; tmp++) {
+    if (sum == SETUP_MAS[7])
+    {
+        for (tmp = 0; tmp <= 7; tmp++)
+        {
             EEP_SETUP_MAS[tmp] = SETUP_MAS[tmp];
         }
     }

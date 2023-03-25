@@ -3,7 +3,7 @@
         {
             "name": "AVR",
             "intelliSenseMode": "${default}",
-            "compilerPath": "C:\\Users\\Michael\\avr8-gnu-toolchain-win32_x86_64\\bin\\avr-gcc.exe",
+            "compilerPath": "C:\\Users\\admin\\avr-gcc-12.1.0_avrdude-7.0-x86-windows\\bin\\avr-gcc.exe",
             "cStandard": "${default}",
             "cppStandard": "${default}",
             "includePath": [],
@@ -16,7 +16,7 @@
                 "-fno-exceptions",
                 "-fno-threadsafe-statics",
                 "-pipe",
-                "-mmcu=atmega128",
+                "-mmcu=atmega128a",
                 "-DF_CPU=11059200UL"
             ]
         }

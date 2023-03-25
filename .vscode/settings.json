@@ -1,4 +1,13 @@
 {
-    "AVR.device.type": "atmega128",
-    "AVR.device.frequency": 11059200
+    "AVR.device.type": "atmega128a",
+    "AVR.device.frequency": 11059200,
+    "AVR.reporter.arguments": [
+        "-A"
+    ],
+    "AVR.source.compiler": "C:\\Users\\admin\\avr-gcc-12.1.0_avrdude-7.0-x86-windows\\bin\\avr-gcc.exe",
+    "AVR.programmer.tool": "C:\\Users\\admin\\avr-gcc-12.1.0_avrdude-7.0-x86-windows\\bin\\avrdude.exe",
+    "AVR.source.libraries": [],
+    "AVR.programmer.type": "usbasp",
+    "AVR.programmer.port": "usb",
+    "AVR.programmer.rate": 375000
 }
